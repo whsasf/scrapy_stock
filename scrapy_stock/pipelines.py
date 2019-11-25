@@ -9,9 +9,12 @@ import urllib.request
 import urllib.parse
 from pymongo import MongoClient
 from scrapy import Item
-from scrapy.conf import settings
+#from scrapy.conf import settings
+from scrapy.utils.project import get_project_settings
 import datetime
 
+
+settings = get_project_settings()
 class ScrapyStockPipeline(object):
     def process_item(self, item, spider):
         return item
