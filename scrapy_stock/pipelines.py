@@ -132,7 +132,7 @@ class Foreignmoney2rmyPipeline(object):
     print("current HKY to RMB rate:{0}\ncurrent dollar to RMB rate:{1}\n".format(hk2rmb_rate,us2rmb_rate))
     
     def process_item(self, item, spider):
-        if item['stock_area'] == ' HK':
+        if item['stock_area'] == 'HK':
             item['stock_value'] = float(item['stock_value']) * Foreignmoney2rmyPipeline.hk2rmb_rate
             #item['stock_value'] = '{:.4f}'.format(item['stock_value'])
         elif item['stock_area'] == 'US':

@@ -11,6 +11,7 @@ class StockSpider(scrapy.Spider):
     name = 'stock'
     #allowed_domains = ['eastmoney']
     start_urls = {
+        'sp_hk':'http://quote.eastmoney.com/hk/09988.html',
         'us_chinese':'http://quote.eastmoney.com/center/gridlist.html#us_chinese',
         'hs_a_board':'http://quote.eastmoney.com/center/gridlist.html#hs_a_board',
         'hk_wellknown':'http://quote.eastmoney.com/center/gridlist.html#hk_wellknown',
@@ -25,6 +26,9 @@ class StockSpider(scrapy.Spider):
     short_loading_wait_time = 0.6
     rendering_page_timeout = 60
     hsa_default_pages = 20
+    
+    #regex
+    regex_stock_info = re.compile('(.*?\(*.*\)*)(\s)*\((.*)\)')
 
     #get first page ,use it to get pagenum
     lua_script_getfirst_page = """
@@ -121,9 +125,14 @@ class StockSpider(scrapy.Spider):
         """
         stock_area = response.meta['stock_area']
         stock_name = response.meta['stock_name']
+        # get real stock name for these with placeholder "None"
+        if stock_name == 'None':
+            mstock_info = response.xpath('/html/head/title/text()').extract()[0]
+            #print("mstock_info",mstock_info)
+            stock_name = re.findall(self.regex_stock_info,mstock_info)[0][0]
+            #print("stock_name:",stock_name)
         stock_id = response.meta['stock_id']
         stock_value = response.xpath('//li[contains(text(),"总市值")]/i/text()').extract()[0]
-        
         stock_value = self.check_stock_value(stock_value)
         #print(stock_name,stock_area,stock_id,stock_value)
         
@@ -184,8 +193,15 @@ class StockSpider(scrapy.Spider):
             url = self.start_urls[title]
             # identify the stock area ,like HK, US ,etc
             if 'hk' in title.lower():
-               stock_area = 'HK'
-               yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': self.lua_script_getfirst_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse_page_num,meta={'stock_area':stock_area})
+                stock_area = 'HK'
+                if not 'sp' in  title.lower():
+                    yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': self.lua_script_getfirst_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse_page_num,meta={'stock_area':stock_area})
+                else:
+                    # direct extract page
+                    # get stock_id  firstly
+                    stock_id = url.split('/')[-1].split('.')[0]
+                    yield SplashRequest(url,endpoint = 'execute',args = {'lua_source':self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.extract_page,dont_filter=True,meta={'stock_name':'None','stock_id':stock_id,'stock_area':stock_area})
+
             elif 'us' in  title.lower():
                stock_area = 'US'
                yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': self.lua_script_getfirst_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse_page_num,meta={'stock_area':stock_area})
