@@ -12,7 +12,7 @@ from scrapy import Item
 #from scrapy.conf import settings
 from scrapy.utils.project import get_project_settings
 import datetime
-
+import json
 
 settings = get_project_settings()
 class ScrapyStockPipeline(object):
@@ -170,7 +170,15 @@ class MongoDBPipeline(object):
         # get time and write it to a time collection
         self.current_date = self.current_date
         Prepare.write_mongo_accessory_collecton(time_stamp=self.current_date)
-
+        
+        # write latest data into a json file ,for stockhey to read
+        sort_data = list(self.db.stock_latest.find({"status_flag":1},{"stock_id":1,"stock_name":1,"stock_area":1,"stock_value":1,"_id":0}).sort("stock_value",-1))
+        for indexxx in range(0,len(sort_data)):
+             sort_data[indexxx]['index'] = indexxx+1
+        #print(sort_data)
+        # wirite json to json file
+        with open('/Users/whsasf/workspace/flask_projects/stockhey_project/static/file/rankdata.json','w',encoding='utf-8')  as filehander:
+            json.dump(sort_data,filehander,ensure_ascii=False,indent=4)
         self.db_client.close()
 
     def process_item(self,item,spider):
