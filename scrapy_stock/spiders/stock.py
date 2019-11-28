@@ -11,13 +11,13 @@ class StockSpider(scrapy.Spider):
     name = 'stock'
     #allowed_domains = ['eastmoney']
     start_urls = {
-        #'sp_hk':'http://quote.eastmoney.com/hk/09988.html',
+        'sp_hk':'http://quote.eastmoney.com/hk/09988.html',
         'us_chinese':'http://quote.eastmoney.com/center/gridlist.html#us_chinese',
-        #'hs_a_board':'http://quote.eastmoney.com/center/gridlist.html#hs_a_board',
-        #'hk_wellknown':'http://quote.eastmoney.com/center/gridlist.html#hk_wellknown',
-        #'hk_bluechips':'http://quote.eastmoney.com/center/gridlist.html#hk_bluechips',
-        #'hk_redchips':'http://quote.eastmoney.com/center/gridlist.html#hk_redchips',
-        #'hk_components':'http://quote.eastmoney.com/center/gridlist.html#hk_components',   
+        'hs_a_board':'http://quote.eastmoney.com/center/gridlist.html#hs_a_board',
+        'hk_wellknown':'http://quote.eastmoney.com/center/gridlist.html#hk_wellknown',
+        'hk_bluechips':'http://quote.eastmoney.com/center/gridlist.html#hk_bluechips',
+        'hk_redchips':'http://quote.eastmoney.com/center/gridlist.html#hk_redchips',
+        'hk_components':'http://quote.eastmoney.com/center/gridlist.html#hk_components',   
     }
     #total_page = 0
 
