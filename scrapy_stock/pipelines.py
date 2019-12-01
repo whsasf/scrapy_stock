@@ -172,7 +172,7 @@ class MongoDBPipeline(object):
         Prepare.write_mongo_accessory_collecton(time_stamp=self.current_date)
         
         # write latest data into a json file ,for stockhey to read
-        sort_data = list(self.db.stock_latest.find({"status_flag":1},{"stock_id":1,"stock_name":1,"stock_area":1,"stock_value":1,"_id":0}).sort("stock_value",-1))
+        sort_data = list(self.db.stock_latest.find({"status_flag":1,"stock_value":{"$gt":0}},{"stock_id":1,"stock_name":1,"stock_area":1,"stock_value":1,"_id":0}).sort("stock_value",-1))
         for indexxx in range(0,len(sort_data)):
              sort_data[indexxx]['index'] = indexxx+1
         #print(sort_data)
