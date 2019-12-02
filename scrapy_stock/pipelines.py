@@ -29,7 +29,7 @@ class Prepare(object):
         """
         this function is used to fetch rate of HKY to RMB and dollar to RMB
         """
-        url = 'http://web.juhe.cn:8080/finance/exchange/rmbquot?key=27457fb2446aeeb661161f4138e9c597'
+        url = 'http://web2.juhe.cn:8080/finance/exchange/rmbquot?key=27457fb2446aeeb661161f4138e9c597'
         try:
             data_stream = eval(urllib.request.urlopen(url,None,10).read().decode('utf-8').replace('null','"null"'))
             if data_stream['resultcode'] == "200":
@@ -132,6 +132,7 @@ class Foreignmoney2rmyPipeline(object):
     print("current HKY to RMB rate:{0}\ncurrent dollar to RMB rate:{1}\n".format(hk2rmb_rate,us2rmb_rate))
     
     def process_item(self, item, spider):
+        
         if item['stock_area'] == 'HK':
             item['stock_value'] = float(item['stock_value']) * Foreignmoney2rmyPipeline.hk2rmb_rate
             #item['stock_value'] = '{:.4f}'.format(item['stock_value'])
@@ -144,7 +145,22 @@ class Foreignmoney2rmyPipeline(object):
         item['stock_value'] = '{:.4f}'.format(float(item['stock_value']))
         return item
 
+# below pipeline settings for get_stock_category -----------------------------------------------------------
 # store into mongodb
+
+
+class Modify_Stock_Name(object):
+    """
+    this pipeline is used to clear the -sw or -w appendix a stock name
+    """
+    def process_item(self, item, spider):
+        if '-SW' in item['stock_name']:
+            item['stock_name'] = item['stock_name'].strip('-SW')
+        elif 'SW' in item['stock_name']:
+            item['stock_name'] = item['stock_name'].strip('SW')
+        return item
+
+
 class MongoDBPipeline(object):
     
     current_date = datetime.datetime.now().strftime('%Y-%m-%d-%p')
@@ -160,7 +176,6 @@ class MongoDBPipeline(object):
         self.db.stock_latest.delete_many({"status_flag":0})
 
     def close_spider(self,spider):
-        
         #change status in stock_latest collection
         if self.db.stock_latest.find({"status_flag":0}).count() > 0:
             # delete the data with status_flag=1 in stock_latest
@@ -172,13 +187,26 @@ class MongoDBPipeline(object):
         Prepare.write_mongo_accessory_collecton(time_stamp=self.current_date)
         
         # write latest data into a json file ,for stockhey to read
-        sort_data = list(self.db.stock_latest.find({"status_flag":1,"stock_value":{"$gt":0}},{"stock_id":1,"stock_name":1,"stock_area":1,"stock_value":1,"_id":0}).sort("stock_value",-1))
-        for indexxx in range(0,len(sort_data)):
-             sort_data[indexxx]['index'] = indexxx+1
-        #print(sort_data)
+        #sort_data = list(self.db.stock_latest.find({"status_flag":1,"stock_value":{"$gt":0}},{"stock_id":1,"stock_name":1,"stock_area":1,"stock_value":1,"_id":0}).sort("stock_value",-1))
+        raw_data_list = list(self.db.stock_latest.aggregate([{"$lookup":{"from":"stock_info","localField":"stock_id","foreignField":"stock_id","as":"result"}},{"$addFields":{"stock_buss_alias":"$result.stock_buss_alias"}},{"$project":{"_id":0,"stock_id":1,"stock_area":1,"stock_name":1,"stock_value":1,"stock_buss_alias":1}}]))
+        #print(len(raw_data_list))
+        
+        for indexxx  in range(0,len(raw_data_list)):
+            try:
+                raw_data_list[indexxx]['index'] = indexxx + 1
+                if raw_data_list[indexxx]['stock_buss_alias'][0]:
+                    raw_data_list[indexxx]['stock_buss_alias'] = raw_data_list[indexxx]['stock_buss_alias'][0]
+                if raw_data_list[indexxx]['stock_value'] == 0:
+                    raw_data_list.pop(indexxx)
+            except IndexError:
+                pass
+        #sort
+        sort_data_list = sorted(raw_data_list, key=lambda x : x['stock_value'], reverse=True)
+        #print(sort_data_list)
+        
         # wirite json to json file
         with open('/Users/whsasf/workspace/flask_projects/stockhey_project/static/file/rankdata.json','w',encoding='utf-8')  as filehander:
-            json.dump(sort_data,filehander,ensure_ascii=False,indent=4)
+            json.dump(sort_data_list,filehander,ensure_ascii=False,indent=4)
         self.db_client.close()
 
     def process_item(self,item,spider):
@@ -201,6 +229,37 @@ class MongoDBPipeline(object):
         item['status_flag'] = 0
         self.db.stock_latest.update_one({"stock_id": item['stock_id'],"status_flag":item['status_flag']},{"$set":{"stock_name": item['stock_name'],"stock_value": item['stock_value'],"status_flag":item['status_flag'],"stock_id": item['stock_id'],"time_stamp":item['time_stamp'],"stock_area":item['stock_area']}},True)
         #self.db.stock_latest.insert_one(item)
-        
+#-----------------------------------------------------------------------------------------------------------        
         
 
+# below pipeline settings for get_stock_category -----------------------------------------------------------
+
+class MongoDBPipeline2(object):
+
+    def open_spider(self,spider):
+        db_uri = spider.settings.get('MONGODB_URI','mongodb://localhost:27017')
+        db_name = spider.settings.get('MONGODB_NAME','stockdb')
+
+        self.db_client = MongoClient(db_uri)
+        self.db = self.db_client[db_name]
+
+    def close_spider(self,spider):
+        self.db_client.close()
+
+    def process_item(self,item,spider):
+        self.insert_db(item)
+        return item
+    
+    def insert_db(self,item):
+        if isinstance(item,Item):
+            item = dict(item)
+        stock_id = item['stock_id']
+        stock_id_buss_alias_already_list = list(self.db.stock_info.find({"stock_id":stock_id},{"_id":0,"stock_buss_alias":1}))
+        #print(stock_id_buss_alias_already_list)
+        if len(stock_id_buss_alias_already_list) > 0:
+            stock_id_buss_alias_already = stock_id_buss_alias_already_list[0]['stock_buss_alias']
+            #print(stock_id_buss_alias_already)
+            if stock_id_buss_alias_already == 'NULL' and item['stock_buss_alias']:
+                self.db.stock_info.update_one({"stock_id": item['stock_id']},{"$set":{"stock_id": item.get('stock_id','NULL'),"stock_name": item.get('stock_name','NULL'),"stock_buss_alias": item.get('stock_buss_alias','NULL'),"stock_buss_official": item.get('stock_buss_official','NULL'),"stock_area":item.get('stock_area','NULL')}},True)
+        else:
+            self.db.stock_info.update_one({"stock_id": item['stock_id']},{"$set":{"stock_id": item.get('stock_id','NULL'),"stock_name": item.get('stock_name','NULL'),"stock_buss_alias": item.get('stock_buss_alias','NULL'),"stock_buss_official": item.get('stock_buss_official','NULL'),"stock_area":item.get('stock_area','NULL')}},True)

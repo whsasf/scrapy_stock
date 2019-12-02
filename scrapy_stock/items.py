@@ -22,4 +22,12 @@ class StockItem(Item):
     #status_flag = Field() # unly used in stock_latest collection
     time_stamp = Field()
 
+class Stock_bussItem(Item):
+    stock_name = Field()
+    stock_id = Field()
+    stock_area = Field()
+    stock_buss_alias = Field() # easy to understand, used as default
+    stock_buss_official = Field() # office from zhengjianhui
+    
+
 

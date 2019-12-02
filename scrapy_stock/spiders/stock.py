@@ -31,15 +31,15 @@ class StockSpider(scrapy.Spider):
     regex_stock_info = re.compile('(.*?\(*.*\)*)(\s)*\((.*)\)')
 
     #get first page ,use it to get pagenum
-    lua_script_getfirst_page = """
-    function main(splash, args)
-      assert(splash:go(args.url))
-      assert(splash:wait({0}))
-       return {{
-        html = splash:html()
-      }}
-    end        
-    """.format(long_loading_wait_time)
+    #lua_script_getfirst_page = """
+    #function main(splash, args)
+    #  assert(splash:go(args.url))
+    #  assert(splash:wait({0}))
+    #   return {{
+    #    html = splash:html()
+    #  }}
+    #end        
+    #""".format(long_loading_wait_time)
 
     #reauest each page，in a loop, input page number from 1 to page_num,then click go
     lua_fetch_pages = """
@@ -70,7 +70,7 @@ class StockSpider(scrapy.Spider):
     """.format(long_loading_wait_time)
 
 
-    # feal with mainland stock pages,only fetch the first 10 pages since it's already sorted desc
+    # deal with mainland stock pages,only fetch the first 10 pages since it's already sorted desc
     lua_HSA_pages = """
     function main(splash, args)
         assert(splash:go(args.url))
@@ -195,7 +195,7 @@ class StockSpider(scrapy.Spider):
             if 'hk' in title.lower():
                 stock_area = 'HK'
                 if not 'sp' in  title.lower():
-                    yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': self.lua_script_getfirst_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse_page_num,meta={'stock_area':stock_area})
+                    yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse_page_num,meta={'stock_area':stock_area})
                 else:
                     # direct extract page
                     # get stock_id  firstly
@@ -204,7 +204,7 @@ class StockSpider(scrapy.Spider):
 
             elif 'us' in  title.lower():
                stock_area = 'US'
-               yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': self.lua_script_getfirst_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse_page_num,meta={'stock_area':stock_area})
+               yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse_page_num,meta={'stock_area':stock_area})
             elif 'hs_a' in  title.lower():
                stock_area = 'CN'
                for i in range(1,self.hsa_default_pages+1):
