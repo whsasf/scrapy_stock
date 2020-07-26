@@ -8,4 +8,8 @@
 >### 4. 数据库使用mongodb
 
 ## 2. 使用方式
->### 1.  
+>### 1. 克隆项目到本地（最好到虚拟环境中）: git clone https://github.com/whsasf/scrapy_stock.git
+>### 2. 安装项目依赖: pip install -r requirements.txt
+>### 3. 爬取股票市值信息: scrapy crawl stocck
+>### 4. 爬取股票类别信息: scrapy crawl get_stock_category
+
