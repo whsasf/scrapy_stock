@@ -17,13 +17,13 @@ class StockSpider(scrapy.Spider):
         #'sp2_hk':'https://quote.eastmoney.com/hk/09999.html', # 已经包含在知名港股中
         #'sp3_hk': 'https://quote.eastmoney.com/hk/09618.html', # 已经包含在知名港股中
 
-        #'hk_wellknown':'https://quote.eastmoney.com/center/gridlist.html#hk_wellknown',#pass
-        #'hk_bluechips':'https://quote.eastmoney.com/center/gridlist.html#hk_bluechips', #pass
-        #'hk_redchips':'https://quote.eastmoney.com/center/gridlist.html#hk_redchips',#pass
-        #'hk_components':'https://quote.eastmoney.com/center/gridlist.html#hk_components',#pass
-        #'united_states':'https://quote.eastmoney.com/center/gridlist.html#us_stocks',#pass
-        #'us_chinese':'https://quote.eastmoney.com/center/gridlist.html#us_chinese',#pass
-        #'hs_a_board':'https://quote.eastmoney.com/center/gridlist.html#hs_a_board',#pass
+        'hk_wellknown':'https://quote.eastmoney.com/center/gridlist.html#hk_wellknown',#pass
+        'hk_bluechips':'https://quote.eastmoney.com/center/gridlist.html#hk_bluechips', #pass
+        'hk_redchips':'https://quote.eastmoney.com/center/gridlist.html#hk_redchips',#pass
+        'hk_components':'https://quote.eastmoney.com/center/gridlist.html#hk_components',#pass
+        'united_states':'https://quote.eastmoney.com/center/gridlist.html#us_stocks',#pass
+        'us_chinese':'https://quote.eastmoney.com/center/gridlist.html#us_chinese',#pass
+        'hs_a_board':'https://quote.eastmoney.com/center/gridlist.html#hs_a_board',#pass
     }
     #total_page = 0
 
