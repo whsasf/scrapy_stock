@@ -39,7 +39,7 @@ DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 # See also autothrottle settings and docs
 DOWNLOAD_DELAY = 0.3
 RANDOMIZE_DOWNLOAD_DELAY = True
-USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36'
+USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54'
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -84,8 +84,9 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     #'scrapy_stock.pipelines.ScrapyStockPipeline': 300,
-    'scrapy_stock.pipelines.Foreignmoney2rmyPipeline': 300, 
-    'scrapy_stock.pipelines.MongoDBPipeline': 400,
+    #'scrapy_stock.pipelines.Modify_Stock_Name': 300,
+    'scrapy_stock.pipelines.Foreignmoney2rmyPipeline': 400, 
+    'scrapy_stock.pipelines.MongoDBPipeline': 500,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

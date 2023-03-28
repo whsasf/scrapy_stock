@@ -17,8 +17,10 @@ class StockItem(Item):
     stock_name = Field()
     stock_id = Field()
     stock_value = Field()
+    stock_come = Field()
     stock_area = Field()
-    #status_flag :1 = latest, 0 = middle state 
+    stock_percent = Field()
+    #status_flag :1 = latest, 0 = middle state
     #status_flag = Field() # unly used in stock_latest collection
     time_stamp = Field()
 
@@ -28,6 +30,3 @@ class Stock_bussItem(Item):
     stock_area = Field()
     stock_buss_alias = Field() # easy to understand, used as default
     stock_buss_official = Field() # office from zhengjianhui
-    
-
-

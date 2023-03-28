@@ -1,0 +1,4 @@
+pymongo
+scrapy_splash
+cfscrape
+lxml
