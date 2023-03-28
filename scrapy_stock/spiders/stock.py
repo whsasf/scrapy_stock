@@ -243,12 +243,14 @@ class StockSpider(scrapy.Spider):
                scraper = cfscrape.create_scraper(delay=10)
                response = scraper.get(url)
                response = html.fromstring(response.text)
-               tt = response.xpath('(//h1)[1]/text()')
-               if len(tt) > 0:
-                stock_name_id = tt[0]
-                stock_name = stock_name_id.split(' ')[0]
-                stock_id = stock_name_id.split(' ')[1][1:-1]
-                stock_value = response.xpath('//*[@id="__next"]/div[2]/div[2]/div/div[1]/div/div[5]/div[1]/dl[2]/a/dd//span/text()')
+               stock_name_id = response.xpath('(//h1)[1]/text()')
+               stock_value = response.xpath('//*[@id="__next"]/div[2]/div[2]/div/div[1]/div/div[5]/div[1]/dl[2]/a/dd//span/text()')
+               if len(stock_name_id) > 0:
+                stock_name_id = stock_name_id[0]
+                ff = stock_name_id.split(' ')
+                if len(ff) > 1:
+                    stock_name = ff[0]
+                    stock_id = ff[1][1:-1]
                 if len(stock_value) >=2:
                     if stock_value[1].endswith('B'):
                         stock_value = float(stock_value[0])*10
