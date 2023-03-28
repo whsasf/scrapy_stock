@@ -141,9 +141,9 @@ class Prepare(object):
 
 class Foreignmoney2rmyPipeline(object):
 
-    #hk2rmb_rate = 0.8952
-    #us2rmb_rate = 7.0079
-    #sar2rmb_rate = 1.8703
+    #hk2rmb_rate = 0.8780
+    #us2rmb_rate = 6.8942
+    #sar2rmb_rate = 1.8311
     oo = Prepare.fetch_rate()
     if oo != 'error' and len(oo) == 3 : #success
         print('fetching rate value successfully!!')
@@ -158,9 +158,9 @@ class Foreignmoney2rmyPipeline(object):
         else:
             # hard code
             print('!!! using hard code rate values !!!')
-            hk2rmb_rate = 0.8952
-            us2rmb_rate = 7.0079
-            sar2rmb_rate = 1.8703
+            hk2rmb_rate = 0.8780
+            us2rmb_rate = 6.8942
+            sar2rmb_rate = 1.8311
         # 也更新时间
         Prepare.write_mongo_accessory_collecton(us2rmb_rate=us2rmb_rate,hk2rmb_rate=hk2rmb_rate,sar2rmb_rate=sar2rmb_rate)
 
