@@ -17,13 +17,13 @@ class StockSpider(scrapy.Spider):
         #'sp2_hk':'https://quote.eastmoney.com/hk/09999.html', # 已经包含在知名港股中
         #'sp3_hk': 'https://quote.eastmoney.com/hk/09618.html', # 已经包含在知名港股中
 
-        'hk_wellknown':'https://quote.eastmoney.com/center/gridlist.html#hk_wellknown',#pass
-        'hk_bluechips':'https://quote.eastmoney.com/center/gridlist.html#hk_bluechips', #pass
-        'hk_redchips':'https://quote.eastmoney.com/center/gridlist.html#hk_redchips',#pass
-        'hk_components':'https://quote.eastmoney.com/center/gridlist.html#hk_components',#pass
-        'united_states':'https://quote.eastmoney.com/center/gridlist.html#us_stocks',#pass
-        'us_chinese':'https://quote.eastmoney.com/center/gridlist.html#us_chinese',#pass
-        'hs_a_board':'https://quote.eastmoney.com/center/gridlist.html#hs_a_board',#pass
+        #'hk_wellknown':'https://quote.eastmoney.com/center/gridlist.html#hk_wellknown',#pass
+        #'hk_bluechips':'https://quote.eastmoney.com/center/gridlist.html#hk_bluechips', #pass
+        #'hk_redchips':'https://quote.eastmoney.com/center/gridlist.html#hk_redchips',#pass
+        #'hk_components':'https://quote.eastmoney.com/center/gridlist.html#hk_components',#pass
+        #'united_states':'https://quote.eastmoney.com/center/gridlist.html#us_stocks',#pass
+        #'us_chinese':'https://quote.eastmoney.com/center/gridlist.html#us_chinese',#pass
+        #'hs_a_board':'https://quote.eastmoney.com/center/gridlist.html#hs_a_board',#pass
     }
     #total_page = 0
 
@@ -31,7 +31,7 @@ class StockSpider(scrapy.Spider):
     middle_loading_wait_time = 1
     short_loading_wait_time = 0.6
     rendering_page_timeout = 60
-    hsa_default_pages = 20
+    hsa_default_pages = 10 #20
     united_states_pages = 10
 
     #regex
@@ -237,11 +237,15 @@ class StockSpider(scrapy.Spider):
             if 'sau' in title.lower():
                stock_area = 'SAU'
                stock_come = 'SAU'
+               stock_name = ""
+               stock_id = ""
+               stock_value = 0
                scraper = cfscrape.create_scraper(delay=10)
-               try:
-                response = scraper.get(url)
-                response = html.fromstring(response.text)
-                stock_name_id = response.xpath('(//h1)[1]/text()')[0]
+               response = scraper.get(url)
+               response = html.fromstring(response.text)
+               tt = response.xpath('(//h1)[1]/text()')
+               if len(tt) > 0:
+                stock_name_id = tt[0]
                 stock_name = stock_name_id.split(' ')[0]
                 stock_id = stock_name_id.split(' ')[1][1:-1]
                 stock_value = response.xpath('//*[@id="__next"]/div[2]/div[2]/div/div[1]/div/div[5]/div[1]/dl[2]/a/dd//span/text()')
@@ -250,11 +254,7 @@ class StockSpider(scrapy.Spider):
                         stock_value = float(stock_value[0])*10
                     elif stock_value[1].endswith('T'):
                         stock_value = float(stock_value[0])*10000
-                else:
-                    stock_value = 0
-                yield SplashRequest(url,endpoint = 'execute', args = {'lua_source': self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout + 30},callback=self.extract_page,meta={'stock_area':stock_area,'stock_come':stock_come, "stock_name": stock_name,"stock_id": stock_id, "stock_value": stock_value})
-               except Exception as err:
-                print(err)
+               yield SplashRequest(url,endpoint = 'execute', args = {'lua_source': self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout + 30},callback=self.extract_page,meta={'stock_area':stock_area,'stock_come':stock_come, "stock_name": stock_name,"stock_id": stock_id, "stock_value": stock_value})
             elif 'hk' in title.lower():
                 stock_area = 'HK'
                 stock_come = 'CN'

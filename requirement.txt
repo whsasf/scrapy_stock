@@ -1,4 +1,5 @@
-pymongo
+scrapy
+pymongo==3.13
 scrapy_splash
 cfscrape
 lxml

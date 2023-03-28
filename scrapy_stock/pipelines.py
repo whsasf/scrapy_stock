@@ -85,7 +85,6 @@ class Prepare(object):
         db_name = settings.get('MONGODB_NAME','stockdb')
         db_client = MongoClient(db_uri)
         db = db_client[db_name]
-
         try:
             collection = db['accessory']
             for key ,value in kw.items():
@@ -152,6 +151,7 @@ class Foreignmoney2rmyPipeline(object):
         Prepare.write_mongo_accessory_collecton(us2rmb_rate=us2rmb_rate,hk2rmb_rate=hk2rmb_rate,sar2rmb_rate=sar2rmb_rate)
     else:
         print('reading rate value form database!')
+        us2rmb_rate,hk2rmb_rate,sar2rmb_rate = "","",""
         array = Prepare.read_mongo_accessory_collecton('us2rmb_rate','hk2rmb_rate','sar2rmb_rate')
         if array != 'error' and len(array) == 3:
             us2rmb_rate,hk2rmb_rate,sar2rmb_rate = array
@@ -161,6 +161,8 @@ class Foreignmoney2rmyPipeline(object):
             hk2rmb_rate = 0.8952
             us2rmb_rate = 7.0079
             sar2rmb_rate = 1.8703
+        # 也更新时间
+        Prepare.write_mongo_accessory_collecton(us2rmb_rate=us2rmb_rate,hk2rmb_rate=hk2rmb_rate,sar2rmb_rate=sar2rmb_rate)
 
     print("current HKY to RMB rate:{0}\ncurrent dollar to RMB rate:{1}\ncurrent sar to RMB rate:{2}\n".format(hk2rmb_rate,us2rmb_rate,sar2rmb_rate))
 
@@ -217,9 +219,9 @@ class MongoDBPipeline(object):
             # delete the data with status_flag=1 in stock_latest
             self.db.stock_latest.delete_many({"status_flag":1})
             Prepare.change_mongo_status(0,1)
-
         # get time and write it to a time collection
         # self.current_date = self.current_date
+        print("mucurrent", self.mucurrent)
         Prepare.write_mongo_accessory_collecton(time_stamp=self.mucurrent)
 
         # write latest data into a json file ,for stockhey to read
