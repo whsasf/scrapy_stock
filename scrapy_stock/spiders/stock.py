@@ -242,6 +242,7 @@ class StockSpider(scrapy.Spider):
                stock_value = 0
                scraper = cfscrape.create_scraper(delay=10)
                response = scraper.get(url)
+               print("response", response)
                response = html.fromstring(response.text)
                stock_name_id = response.xpath('(//h1)[1]/text()')
                stock_value = response.xpath('//*[@id="__next"]/div[2]/div[2]/div/div[1]/div/div[5]/div[1]/dl[2]/a/dd//span/text()')
