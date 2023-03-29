@@ -39,7 +39,7 @@ class GetStockCategorySpider(scrapy.Spider):
     middle_loading_wait_time = 1
     short_loading_wait_time = 0.6
     rendering_page_timeout = 70
-    hsa_default_pages =  10 #20
+    hsa_default_pages =  20 #20
     united_states_pages = 10
 
 
