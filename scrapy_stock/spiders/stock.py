@@ -194,7 +194,7 @@ class StockSpider(scrapy.Spider):
         stock_area = response.meta['stock_area']
         stock_come = response.meta['stock_come']
         url_list = response.xpath('//td[@class="mywidth"]/a/@href').extract()
-        name_list = response.xpath('//td[@class="mywidth"]/a/text()').extract()
+        name_list = response.xpath('//td[@class="mywidth"]/a/descendant-or-self::*/text()').extract()
         stock_id_list = [url.split('.')[-1] for url in url_list]
 
         if stock_area == 'HK':

@@ -36,23 +36,19 @@ class Prepare(object):
             data_stream = eval(urllib.request.urlopen(url,None,10).read().decode('utf-8').replace('null','"null"'))
             data_stream2 = eval(urllib.request.urlopen(urls,None,10).read().decode('utf-8').replace('null','"null"'))
             if data_stream['resultcode'] == "200":
-                print(data_stream['result'][''])
                 for data in data_stream['result'][0]:
-
                     if data_stream['result'][0][data]['name'] == '美元':
                         us2rmb_rate = float(data_stream['result'][0][data]['mSellPri'])/100
                     elif data_stream['result'][0][data]['name'] == '港币':
                         hk2rmb_rate = float(data_stream['result'][0][data]['mSellPri'])/100
             else:
                 return ('error')
-            
             if data_stream2['reason'] == '查询成功!':
                 sar2rmb_rate = float(data_stream2['result'][0]['exchange'])
-                print('sar2rmb_rate',sar2rmb_rate)
             else:
                 return ('error')
-            
-        except:
+        except Exception as err:
+            print("err", err)
             return ('error')
         if float(us2rmb_rate) >0 and float(hk2rmb_rate) >0 and  sar2rmb_rate >0:
             return (us2rmb_rate,hk2rmb_rate,sar2rmb_rate)
@@ -145,6 +141,7 @@ class Foreignmoney2rmyPipeline(object):
     #us2rmb_rate = 6.8942
     #sar2rmb_rate = 1.8311
     oo = Prepare.fetch_rate()
+    print("oo", oo)
     if oo != 'error' and len(oo) == 3 : #success
         print('fetching rate value successfully!!')
         us2rmb_rate,hk2rmb_rate,sar2rmb_rate = oo
