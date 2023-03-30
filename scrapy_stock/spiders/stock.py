@@ -240,7 +240,7 @@ class StockSpider(scrapy.Spider):
                stock_name = ""
                stock_id = ""
                stock_value = 0
-               scraper = cfscrape.create_scraper(delay=10)
+               scraper = cfscrape.create_scraper(delay=30)
                response = scraper.get(url)
                print("response", response)
                response = html.fromstring(response.text)

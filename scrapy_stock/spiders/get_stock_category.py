@@ -254,7 +254,7 @@ class GetStockCategorySpider(scrapy.Spider):
 
             if 'sau' in title.lower():
               stock_area = 'SAU'
-              scraper = cfscrape.create_scraper(delay=10)
+              scraper = cfscrape.create_scraper(delay=30)
               responce = scraper.get(url)
               print("responce", responce)
               response = html.fromstring(responce.text)
