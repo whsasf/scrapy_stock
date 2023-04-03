@@ -235,29 +235,29 @@ class StockSpider(scrapy.Spider):
             url = self.start_urls[title]
             # identify the stock area ,like HK, US ,etc
             if 'sau' in title.lower():
-               stock_area = 'SAU'
-               stock_come = 'SAU'
-               stock_name = ""
-               stock_id = ""
-               stock_value = 0
-               scraper = cfscrape.create_scraper(delay=10)
-               response = scraper.get(url)
-               print("response", response)
-               response = html.fromstring(response.text)
-               stock_name_id = response.xpath('(//h1)[1]/text()')
-               stock_value = response.xpath('//*[@id="__next"]/div[2]/div[2]/div/div[1]/div/div[5]/div[1]/dl[2]/a/dd//span/text()')
-               if len(stock_name_id) > 0:
-                stock_name_id = stock_name_id[0]
-                ff = stock_name_id.split(' ')
-                if len(ff) > 1:
-                    stock_name = ff[0]
-                    stock_id = ff[1][1:-1]
+                stock_area = 'SAU'
+                stock_come = 'SAU'
+                stock_name = ""
+                stock_id = ""
+                stock_value = 0
+                scraper = cfscrape.create_scraper(delay=30)
+                response = scraper.get(url)
+                print("response", response)
+                response = html.fromstring(response.text)
+                stock_name_id = response.xpath('(//h1)[1]/text()')
+                stock_value = response.xpath('//*[@id="__next"]/div[2]/div[2]/div/div[1]/div/div[5]/div[1]/dl[2]/a/dd//span/text()')
+                if len(stock_name_id) > 0:
+                    stock_name_id = stock_name_id[0]
+                    ff = stock_name_id.split(' ')
+                    if len(ff) > 1:
+                        stock_name = ff[0]
+                        stock_id = ff[1][1:-1]
                 if len(stock_value) >=2:
                     if stock_value[1].endswith('B'):
                         stock_value = float(stock_value[0])*10
                     elif stock_value[1].endswith('T'):
                         stock_value = float(stock_value[0])*10000
-               yield SplashRequest(url,endpoint = 'execute', args = {'lua_source': self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout + 30},callback=self.extract_page,meta={'stock_area':stock_area,'stock_come':stock_come, "stock_name": stock_name,"stock_id": stock_id, "stock_value": stock_value})
+                yield SplashRequest(url,endpoint = 'execute', args = {'lua_source': self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.extract_page,meta={'stock_area':stock_area,'stock_come':stock_come, "stock_name": stock_name,"stock_id": stock_id, "stock_value": stock_value})
             elif 'hk' in title.lower():
                 stock_area = 'HK'
                 stock_come = 'CN'
@@ -270,18 +270,18 @@ class StockSpider(scrapy.Spider):
                     yield SplashRequest(url,endpoint = 'execute',args = {'lua_source':self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.extract_page,dont_filter=True,meta={'stock_name':'None','stock_id':stock_id,'stock_area':stock_area,'stock_come':stock_come})
 
             elif 'us_chinese' in  title.lower():
-               stock_area = 'US'
-               stock_come = 'CN'
-               yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse_page_num,meta={'stock_area':stock_area,'stock_come':stock_come})
+                stock_area = 'US'
+                stock_come = 'CN'
+                yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse_page_num,meta={'stock_area':stock_area,'stock_come':stock_come})
             elif 'united_states' in  title.lower():
-               stock_area = 'US'
-               stock_come = 'US'
-               for i in range(1,self.united_states_pages+1):
-                   real_lua_source = self.lua_United_states_pages.format(i)
-                   yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': real_lua_source ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse,meta={'stock_area':stock_area,'stock_come':stock_come})
+                stock_area = 'US'
+                stock_come = 'US'
+                for i in range(1,self.united_states_pages+1):
+                    real_lua_source = self.lua_United_states_pages.format(i)
+                    yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': real_lua_source ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse,meta={'stock_area':stock_area,'stock_come':stock_come})
             elif 'hs_a' in  title.lower():
-               stock_area = 'CN'
-               stock_come = 'CN'
-               for i in range(1,self.hsa_default_pages+1):
-                   real_lua_source = self.lua_HSA_pages.format(i)
-                   yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': real_lua_source ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse,dont_filter=True,meta={'stock_area':stock_area,'stock_come':stock_come})
+                stock_area = 'CN'
+                stock_come = 'CN'
+                for i in range(1,self.hsa_default_pages+1):
+                    real_lua_source = self.lua_HSA_pages.format(i)
+                    yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': real_lua_source ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.parse,dont_filter=True,meta={'stock_area':stock_area,'stock_come':stock_come})
