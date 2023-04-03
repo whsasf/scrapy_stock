@@ -10,7 +10,8 @@
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 BOT_NAME = 'scrapy_stock'
-SPLASH_URL='http://localhost:8050'
+#SPLASH_URL='http://localhost:8050'
+SPLASH_URL='localhost:8051' # nginx 启用反向代理，后面挂了两个splash实例
 
 SPIDER_MODULES = ['scrapy_stock.spiders']
 NEWSPIDER_MODULE = 'scrapy_stock.spiders'
