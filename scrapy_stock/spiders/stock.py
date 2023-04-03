@@ -31,7 +31,7 @@ class StockSpider(scrapy.Spider):
     middle_loading_wait_time = 1
     short_loading_wait_time = 0.6
     rendering_page_timeout = 60
-    hsa_default_pages = 20 #20
+    hsa_default_pages = 15 #20
     united_states_pages = 10
 
     #regex
