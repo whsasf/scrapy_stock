@@ -2,7 +2,6 @@
 import scrapy
 from scrapy_splash import SplashRequest
 from ..items import Stock_bussItem
-import cfscrape
 from lxml import html
 
 class GetStockCategorySpider(scrapy.Spider):
@@ -141,7 +140,18 @@ class GetStockCategorySpider(scrapy.Spider):
         stock_name = response.meta['stock_name']
 
         if stock_area.lower() == 'sau':
-            stock_buss_alias = response.meta['stock_buss_alias']
+            stock_name = ""
+            stock_id = ""
+            stock_buss_alias = ""
+            stock_name_id = response.xpath('(//h1)[1]/text()').extract()
+            if len(stock_name_id) > 0:
+                stock_name_id = stock_name_id[0]
+                stock_name_id = stock_name_id.split(' ')
+                stock_name = stock_name_id[0]
+                stock_id = stock_name_id[1][1:-1]
+            stock_buss_alias_raw = response.xpath('//*[@id="__next"]/div[2]/div[2]/div/div[1]/div/div[10]/div/div[2]/div[1]/a/text()').extract()
+            if len(stock_buss_alias_raw) > 0 :
+                stock_buss_alias = stock_buss_alias_raw[0]
             stock_buss_official = stock_buss_alias
         if stock_area == 'HK':
             stock_buss_official = 'NULL'
@@ -254,25 +264,7 @@ class GetStockCategorySpider(scrapy.Spider):
 
             if 'sau' in title.lower():
                 stock_area = 'SAU'
-                scraper = cfscrape.create_scraper(delay=30)
-                responce = scraper.get(url)
-                print("responce", responce)
-                response = html.fromstring(responce.text)
-                stock_name = ""
-                stock_id = 0
-                stock_name_id = response.xpath('(//h1)[1]/text()')
-                stock_buss_alias = response.xpath('//*[@id="__next"]/div[2]/div[2]/div/div[1]/div/div[10]/div/div[2]/div[1]/a/text()')
-                if len(stock_name_id) > 0:
-                    stock_name_id = stock_name_id[0]
-                    tt = stock_name_id.split(' ')
-                    if len(tt) > 1:
-                        stock_name = stock_name_id.split(' ')[0]
-                        stock_id = stock_name_id.split(' ')[1][1:-1]
-                if len(stock_buss_alias) > 0 :
-                    stock_buss_alias = stock_buss_alias[0]
-                else:
-                    stock_buss_alias = 'NULL'
-                yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.extract_page,meta={'stock_area':stock_area,'stock_id':stock_id,'stock_name':stock_name, 'stock_buss_alias' : stock_buss_alias })
+                yield SplashRequest(url,endpoint = 'execute',args = {'lua_source': self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.extract_page,meta={'stock_area':stock_area,'stock_id':"NN",'stock_name':"NN" })
             elif 'hk' in title.lower():
                 stock_area = 'HK'
                 if not 'sp' in  title.lower():

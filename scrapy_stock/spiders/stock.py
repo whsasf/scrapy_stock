@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import cfscrape
 from lxml import html
 from scrapy_splash import SplashRequest
 from ..items import StockItem
@@ -168,7 +167,6 @@ class StockSpider(scrapy.Spider):
         this function is used to extarctc the expected data from page
         """
         stock_area = response.meta.get('stock_area','None')
-        stock_name = response.meta.get('stock_name','None')
         stock_come = response.meta.get('stock_come','None')
         # get real stock name for these with placeholder "None"
         if stock_area.lower() == 'hk':
@@ -179,8 +177,24 @@ class StockSpider(scrapy.Spider):
             stock_value = response.xpath('//td[contains(text(),"总市值")]/span/span/text()').extract()[0]
             stock_value = self.check_stock_value(stock_value)
         if stock_area.lower() == 'sau':
-            stock_value = response.meta.get('stock_value','None')
-            stock_id = response.meta.get('stock_id','None')
+            stock_name_id = response.xpath('(//h1)[1]/text()').extract()
+            stock_name = ""
+            stock_id = ""
+            if len(stock_name_id) > 0:
+                stock_name_id = stock_name_id[0]
+                stock_name_id = stock_name_id.split(' ')
+                stock_name = stock_name_id[0]
+                stock_id = stock_name_id[1][1:-1]
+            stock_value_raw = response.xpath('//*[@id="__next"]/div[2]/div[2]/div/div[1]/div/div[5]/div[1]/dl[2]/a/dd//span/text()').extract()
+            stock_value = 0
+            if len(stock_value_raw) >= 2:
+                if stock_value_raw[1].endswith('B'):
+                    stock_value_raw = float(stock_value_raw[0])*10
+                elif stock_value_raw[1].endswith('T'):
+                    stock_value_raw = float(stock_value_raw[0])*10000
+            else:
+                stock_value_raw = 0
+            stock_value = stock_value_raw
         stock = StockItem()
         stock["stock_come"] = stock_come
         stock["stock_name"] = stock_name.strip(' ')
@@ -237,27 +251,7 @@ class StockSpider(scrapy.Spider):
             if 'sau' in title.lower():
                 stock_area = 'SAU'
                 stock_come = 'SAU'
-                stock_name = ""
-                stock_id = ""
-                stock_value = 0
-                scraper = cfscrape.create_scraper(delay=30)
-                response = scraper.get(url)
-                print("response", response)
-                response = html.fromstring(response.text)
-                stock_name_id = response.xpath('(//h1)[1]/text()')
-                stock_value = response.xpath('//*[@id="__next"]/div[2]/div[2]/div/div[1]/div/div[5]/div[1]/dl[2]/a/dd//span/text()')
-                if len(stock_name_id) > 0:
-                    stock_name_id = stock_name_id[0]
-                    ff = stock_name_id.split(' ')
-                    if len(ff) > 1:
-                        stock_name = ff[0]
-                        stock_id = ff[1][1:-1]
-                if len(stock_value) >=2:
-                    if stock_value[1].endswith('B'):
-                        stock_value = float(stock_value[0])*10
-                    elif stock_value[1].endswith('T'):
-                        stock_value = float(stock_value[0])*10000
-                yield SplashRequest(url,endpoint = 'execute', args = {'lua_source': self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.extract_page,meta={'stock_area':stock_area,'stock_come':stock_come, "stock_name": stock_name,"stock_id": stock_id, "stock_value": stock_value})
+                yield SplashRequest(url,endpoint = 'execute', args = {'lua_source': self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.extract_page,meta={'stock_area':stock_area,'stock_come':stock_come})
             elif 'hk' in title.lower():
                 stock_area = 'HK'
                 stock_come = 'CN'
