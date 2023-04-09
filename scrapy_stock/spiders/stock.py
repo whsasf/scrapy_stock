@@ -168,6 +168,7 @@ class StockSpider(scrapy.Spider):
         """
         stock_area = response.meta.get('stock_area','None')
         stock_come = response.meta.get('stock_come','None')
+        stock_name = response.meta.get('stock_name','None')
         # get real stock name for these with placeholder "None"
         if stock_area.lower() == 'hk':
             if stock_name == 'None':
@@ -210,7 +211,6 @@ class StockSpider(scrapy.Spider):
         url_list = response.xpath('//td[@class="mywidth"]/a/@href').extract()
         name_list = response.xpath('//td[@class="mywidth"]/a/descendant-or-self::*/text()').extract()
         stock_id_list = [url.split('.')[-1] for url in url_list]
-
         if stock_area == 'HK':
             group_list = list(zip(url_list,name_list,stock_id_list))
             for group in group_list:
@@ -262,7 +262,6 @@ class StockSpider(scrapy.Spider):
                     # get stock_id  firstly
                     stock_id = url.split('/')[-1].split('.')[0]
                     yield SplashRequest(url,endpoint = 'execute',args = {'lua_source':self.lua_extract_page ,'images': 0,'timeout': self.rendering_page_timeout},callback=self.extract_page,dont_filter=True,meta={'stock_name':'None','stock_id':stock_id,'stock_area':stock_area,'stock_come':stock_come})
-
             elif 'us_chinese' in  title.lower():
                 stock_area = 'US'
                 stock_come = 'CN'
